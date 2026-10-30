@@ -84,20 +84,20 @@ Scanning socket bindings for port 3000...
 Download and install the latest `.deb` release:
 
 ```bash
-wget https://github.com/yourusername/portsnip/releases/latest/download/portsnip_1.0.0-1_all.deb
+wget https://github.com/zhumail88/portsnip/releases/latest/download/portsnip_1.0.0-1_all.deb
 sudo apt install ./portsnip_1.0.0-1_all.deb
 ```
 
 ### Option 2: Automated Installation Script
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yourusername/portsnip/main/scripts/install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/zhumail88/portsnip/main/scripts/install.sh | sudo bash
 ```
 
 ### Option 3: Install from Source (Developer Setup)
 
 ```bash
-git clone https://github.com/yourusername/portsnip.git
+git clone https://github.com/zhumail88/portsnip.git
 cd portsnip
 python3 -m venv .venv
 source .venv/bin/activate
