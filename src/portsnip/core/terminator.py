@@ -17,17 +17,17 @@ from portsnip.core.signals import (
 )
 
 __all__ = [
-    "PortsnipError",
-    "ProtectedProcessError",
     "PermissionDeniedError",
+    "PortsnipError",
     "ProcessNotFoundError",
-    "TerminationTimeoutError",
-    "TerminationResult",
     "ProcessTerminator",
-    "is_process_alive",
+    "ProtectedProcessError",
+    "TerminationResult",
+    "TerminationTimeoutError",
     "check_safety_guards",
-    "send_term",
-    "send_kill",
+    "is_process_alive",
     "poll_process_exit",
+    "send_kill",
+    "send_term",
     "terminate_process",
 ]

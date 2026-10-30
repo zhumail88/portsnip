@@ -83,6 +83,7 @@ class TestCLI(unittest.TestCase):
         with patch("sys.stdout", new_callable=io.StringIO) as mock_out:
             code = main(["3000", "-q"])
             self.assertEqual(code, 0)
+            self.assertEqual(mock_out.getvalue(), "")
 
 
 if __name__ == "__main__":

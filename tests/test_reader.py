@@ -13,7 +13,6 @@ from portsnip.core.reader import (
     decode_address,
     decode_ipv4_hex,
     decode_ipv6_hex,
-    find_process_by_port,
     parse_proc_net_file,
 )
 

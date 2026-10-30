@@ -1,6 +1,7 @@
 """Unit tests for ProcessInfo data model."""
 
 import unittest
+
 from portsnip.core.models import ProcessInfo
 
 

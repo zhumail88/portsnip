@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import time
 import unittest
 
 from portsnip.core.signals import (
@@ -12,8 +11,6 @@ from portsnip.core.signals import (
     ProtectedProcessError,
     check_safety_guards,
     is_process_alive,
-    send_kill,
-    send_term,
     terminate_process,
 )
 

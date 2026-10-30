@@ -1,7 +1,6 @@
 """Data models for processes and network sockets."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -22,7 +21,7 @@ class ProcessInfo:
         local_address: Formatted local IP address (e.g. '127.0.0.1' or '0.0.0.0').
     """
 
-    pid: Optional[int]
+    pid: int | None
     name: str
     cmdline: str
     user: str

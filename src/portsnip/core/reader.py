@@ -6,7 +6,6 @@ import os
 import pwd
 import socket
 import struct
-from typing import Dict, List, Optional, Tuple
 
 from portsnip.core.models import ProcessInfo
 
@@ -37,7 +36,7 @@ def decode_ipv4_hex(hex_ip: str) -> str:
     try:
         raw = struct.pack("<I", int(hex_ip, 16))
         return socket.inet_ntoa(raw)
-    except Exception:
+    except (ValueError, struct.error, OSError):
         return hex_ip
 
 
@@ -47,11 +46,11 @@ def decode_ipv6_hex(hex_ip: str) -> str:
         words = [int(hex_ip[i : i + 8], 16) for i in range(0, 32, 8)]
         raw = struct.pack("<4I", *words)
         return socket.inet_ntop(socket.AF_INET6, raw)
-    except Exception:
+    except (ValueError, struct.error, OSError):
         return hex_ip
 
 
-def decode_address(raw_addr: str) -> Tuple[str, int]:
+def decode_address(raw_addr: str) -> tuple[str, int]:
     """Parse a Linux /proc/net address string (e.g. '0100007F:0BB8').
 
     Returns:
@@ -72,7 +71,7 @@ def decode_address(raw_addr: str) -> Tuple[str, int]:
     return ip, port
 
 
-def parse_proc_net_file(file_path: str, valid_states: set[str]) -> List[dict]:
+def parse_proc_net_file(file_path: str, valid_states: set[str]) -> list[dict]:
     """Parse a single /proc/net/ socket file.
 
     Returns a list of dicts with:
@@ -122,9 +121,9 @@ def parse_proc_net_file(file_path: str, valid_states: set[str]) -> List[dict]:
     return results
 
 
-def build_inode_to_pid_map() -> Dict[int, int]:
+def build_inode_to_pid_map() -> dict[int, int]:
     """Traverse /proc/[pid]/fd/* to map socket inodes to process IDs."""
-    inode_to_pid: Dict[int, int] = {}
+    inode_to_pid: dict[int, int] = {}
     proc_dir = "/proc"
 
     if not os.path.exists(proc_dir):
@@ -170,11 +169,11 @@ def get_process_info_from_proc(
     pid: int,
     port: int,
     protocol: str = "TCP",
-    uid: Optional[int] = None,
+    uid: int | None = None,
     inode: int = 0,
     local_address: str = "0.0.0.0",
     state: str = "LISTEN",
-) -> Optional[ProcessInfo]:
+) -> ProcessInfo | None:
     """Read process details directly from /proc/<pid>/status and /proc/<pid>/cmdline."""
     pid_dir = f"/proc/{pid}"
     if not os.path.exists(pid_dir):
@@ -239,9 +238,9 @@ def get_process_info_from_proc(
     )
 
 
-def scan_via_proc(target_port: Optional[int] = None) -> List[ProcessInfo]:
+def scan_via_proc(target_port: int | None = None) -> list[ProcessInfo]:
     """Scan sockets and processes using Linux /proc filesystem."""
-    results: List[ProcessInfo] = []
+    results: list[ProcessInfo] = []
     inode_to_pid = build_inode_to_pid_map()
 
     # Collect socket entries from /proc/net
@@ -310,14 +309,14 @@ def scan_via_proc(target_port: Optional[int] = None) -> List[ProcessInfo]:
     return results
 
 
-def scan_via_psutil(target_port: Optional[int] = None) -> List[ProcessInfo]:
+def scan_via_psutil(target_port: int | None = None) -> list[ProcessInfo]:
     """Fallback scanner using the psutil library."""
     try:
         import psutil
     except ImportError:
         return []
 
-    results: List[ProcessInfo] = []
+    results: list[ProcessInfo] = []
     try:
         connections = psutil.net_connections(kind="inet")
     except (psutil.AccessDenied, PermissionError, OSError):
@@ -400,7 +399,7 @@ class PortScanner:
         self.use_proc = use_proc
         self.use_psutil_fallback = use_psutil_fallback
 
-    def find_by_port(self, port: int) -> Optional[ProcessInfo]:
+    def find_by_port(self, port: int) -> ProcessInfo | None:
         """Find the process listening on a given port."""
         if self.use_proc and os.path.exists("/proc/net"):
             candidates = scan_via_proc(target_port=port)
@@ -424,9 +423,9 @@ class PortScanner:
 
         return None
 
-    def list_all(self) -> List[ProcessInfo]:
+    def list_all(self) -> list[ProcessInfo]:
         """List all processes holding listening sockets."""
-        items: List[ProcessInfo] = []
+        items: list[ProcessInfo] = []
         if self.use_proc and os.path.exists("/proc/net"):
             items = scan_via_proc(target_port=None)
 
@@ -435,7 +434,9 @@ class PortScanner:
         elif self.use_psutil_fallback:
             # If some items in proc had PID=None, enrich them with psutil if psutil has permission
             psutil_items = {
-                (p.port, p.protocol): p for p in scan_via_psutil(target_port=None) if p.pid is not None
+                (p.port, p.protocol): p
+                for p in scan_via_psutil(target_port=None)
+                if p.pid is not None
             }
             enriched = []
             for it in items:
@@ -450,13 +451,13 @@ class PortScanner:
         return items
 
 
-def find_process_by_port(port: int) -> Optional[ProcessInfo]:
+def find_process_by_port(port: int) -> ProcessInfo | None:
     """Convenience helper to find process holding port."""
     scanner = PortScanner()
     return scanner.find_by_port(port)
 
 
-def list_listening_ports() -> List[ProcessInfo]:
+def list_listening_ports() -> list[ProcessInfo]:
     """Convenience helper to list all listening processes."""
     scanner = PortScanner()
     return scanner.list_all()

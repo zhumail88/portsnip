@@ -5,8 +5,8 @@ from __future__ import annotations
 import os
 import signal
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 PROTECTED_PID_THRESHOLD = 10
 
@@ -72,7 +72,9 @@ def is_process_alive(pid: int) -> bool:
     return True
 
 
-def check_safety_guards(pid: int, owner_uid: Optional[int] = None, owner_name: Optional[str] = None) -> None:
+def check_safety_guards(
+    pid: int, owner_uid: int | None = None, owner_name: str | None = None
+) -> None:
     """Verify that the target PID is safe and permitted to be terminated.
 
     Raises:
@@ -87,9 +89,7 @@ def check_safety_guards(pid: int, owner_uid: Optional[int] = None, owner_name: O
     current_uid = os.getuid()
     if current_uid != 0 and owner_uid is not None and owner_uid != current_uid:
         user_desc = owner_name if owner_name else f"UID {owner_uid}"
-        raise PermissionDeniedError(
-            f"Unable to terminate PID {pid} (owned by {user_desc})."
-        )
+        raise PermissionDeniedError(f"Unable to terminate PID {pid} (owned by {user_desc}).")
 
 
 def send_term(pid: int) -> bool:
@@ -142,9 +142,9 @@ class ProcessTerminator:
         self,
         pid: int,
         force: bool = False,
-        owner_uid: Optional[int] = None,
-        owner_name: Optional[str] = None,
-        escalate_prompt: Optional[Callable[[], bool]] = None,
+        owner_uid: int | None = None,
+        owner_name: str | None = None,
+        escalate_prompt: Callable[[], bool] | None = None,
     ) -> TerminationResult:
         """Execute the tiered termination sequence.
 
@@ -202,17 +202,15 @@ class ProcessTerminator:
                     f"Process {pid} persisted even after SIGKILL (uninterruptible state)."
                 )
 
-        raise TerminationTimeoutError(
-            f"Process {pid} did not exit after SIGTERM (15)."
-        )
+        raise TerminationTimeoutError(f"Process {pid} did not exit after SIGTERM (15).")
 
 
 def terminate_process(
     pid: int,
     force: bool = False,
-    owner_uid: Optional[int] = None,
-    owner_name: Optional[str] = None,
-    escalate_prompt: Optional[Callable[[], bool]] = None,
+    owner_uid: int | None = None,
+    owner_name: str | None = None,
+    escalate_prompt: Callable[[], bool] | None = None,
 ) -> TerminationResult:
     """Convenience helper to terminate a process."""
     terminator = ProcessTerminator()

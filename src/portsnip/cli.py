@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from typing import List, Optional
 
 from portsnip import __version__
 
@@ -86,7 +85,7 @@ def format_process_box(proc) -> str:
         f"| {header:<{total_w - 4}} |",
         "+" + "-" * col1_w + "+" + "-" * (total_w - col1_w - 3) + "+",
         f"| {'Process Name':<{col1_w - 1}} | {proc.name:<{col2_w}} |",
-        f"| {'PID':<{col1_w - 1}} | {str(proc.pid):<{col2_w}} |",
+        f"| {'PID':<{col1_w - 1}} | {proc.pid!s:<{col2_w}} |",
         f"| {'User':<{col1_w - 1}} | {proc.formatted_user:<{col2_w}} |",
         f"| {'Memory Footprint':<{col1_w - 1}} | {proc.formatted_memory:<{col2_w}} |",
         f"| {'Runtime Command':<{col1_w - 1}} | {cmd:<{col2_w}} |",
@@ -95,7 +94,7 @@ def format_process_box(proc) -> str:
     return "\n".join(lines)
 
 
-def render_list(processes: List, quiet: bool = False) -> None:
+def render_list(processes: list, quiet: bool = False) -> None:
     """Render list of active listening sockets."""
     if not processes:
         if not quiet:
@@ -139,7 +138,9 @@ def render_list(processes: List, quiet: bool = False) -> None:
             pass
 
     # Plain text output for scripts / pipes
-    header = f"{'PORT':<8} {'PROTO':<6} {'PID':<8} {'PROCESS':<16} {'USER':<14} {'MEMORY':<10} COMMAND"
+    header = (
+        f"{'PORT':<8} {'PROTO':<6} {'PID':<8} {'PROCESS':<16} {'USER':<14} {'MEMORY':<10} COMMAND"
+    )
     print(header)
     print("-" * 80)
     for p in processes:
@@ -152,7 +153,7 @@ def render_list(processes: List, quiet: bool = False) -> None:
         )
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     """Main CLI entry point."""
     parser = create_parser()
     args = parser.parse_args(argv)
@@ -260,7 +261,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         def prompt_escalate() -> bool:
             try:
                 esc_reply = (
-                    input(f"? Process {proc.pid} did not exit after SIGTERM. Escalate to SIGKILL (9)? [y/N]: ")
+                    input(
+                        f"? Process {proc.pid} did not exit after SIGTERM. Escalate to SIGKILL (9)? [y/N]: "
+                    )
                     .strip()
                     .lower()
                 )
@@ -280,9 +283,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         if res.success:
             if not args.quiet:
                 if res.escalated:
-                    print(f"[OK] Dispatched SIGKILL (9)... Process evicted.")
+                    print("[OK] Dispatched SIGKILL (9)... Process evicted.")
                 elif res.signal_sent == 15:
-                    print(f"[OK] Dispatched SIGTERM (15)... Clean exit confirmed.")
+                    print("[OK] Dispatched SIGTERM (15)... Clean exit confirmed.")
                 else:
                     print(f"[OK] {res.message}")
                 print(f"[OK] Port {port} is now free.")
@@ -305,7 +308,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     except KeyboardInterrupt:
         print("\n[INFO] Operation interrupted.", file=sys.stderr)
         return 130
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[ERROR] Unexpected error: {e}", file=sys.stderr)
         return 1
 

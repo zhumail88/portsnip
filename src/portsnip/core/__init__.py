@@ -12,14 +12,14 @@ from portsnip.core.signals import (
 )
 
 __all__ = [
-    "ProcessInfo",
+    "PermissionDeniedError",
     "PortScanner",
-    "find_process_by_port",
-    "list_listening_ports",
+    "ProcessInfo",
     "ProcessTerminator",
     "ProtectedProcessError",
-    "PermissionDeniedError",
-    "TerminationTimeoutError",
     "TerminationResult",
+    "TerminationTimeoutError",
+    "find_process_by_port",
+    "list_listening_ports",
     "terminate_process",
 ]
