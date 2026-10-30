@@ -1,0 +1,11 @@
+iniconfig==2.3.1
+markdown-it-py==4.2.0
+mdurl==0.1.2
+packaging==26.3
+pluggy==1.7.0
+-e git+ssh://git@github.com/zhumail88/portsnip.git@8482aa12862084a8a9bb01c2c668a1b847d01742#egg=portsnip
+psutil==7.2.2
+Pygments==2.21.0
+pytest==9.2.0
+rich==15.0.0
+ruff==0.17.3
